@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Đã xảy ra lỗi - KhoHang Pro</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" th:href="@{/css/home.css}">
+</head>
+<body class="clean-body">
+    <div style="min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 20px;">
+        <div class="card" style="max-width: 520px; width: 100%; text-align: center; padding: 40px 30px;">
+            <div style="width: 64px; height: 64px; border-radius: 50%; background: #fee2e2; color: #ef4444; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px auto;">
+                <svg viewBox="0 0 24 24" style="width: 32px; height: 32px; fill: currentColor;"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg>
+            </div>
+            <h2 style="font-size: 22px; font-weight: 700; color: #0f172a; margin-bottom: 8px;">Đã xảy ra sự cố!</h2>
+            <p style="color: #64748b; font-size: 14px; margin-bottom: 24px;" th:text="${errorMessage != null ? errorMessage : 'Hệ thống phát hiện lỗi không mong muốn trong quá trình xử lý.'}">Chi tiết lỗi</p>
+            <div style="display: flex; gap: 12px; justify-content: center;">
+                <a href="/home" class="btn btn-primary">Về Trang Chủ</a>
+                <a href="javascript:history.back()" class="btn btn-outline">Quay lại</a>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

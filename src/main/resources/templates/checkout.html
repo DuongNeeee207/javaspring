@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Đặt Hàng & Xuất Kho - KhoHang Pro</title>
+    <link rel="stylesheet" th:href="@{/css/home.css}">
+</head>
+<body>
+
+    <!-- Unified Navbar -->
+    <header th:replace="~{fragments/navbar :: header('checkout')}"></header>
+
+    <main class="container">
+        <!-- Page Header -->
+        <div class="page-header">
+            <div>
+                <h1 class="page-title">Phiếu Đặt Hàng Xuất Kho</h1>
+                <p class="page-subtitle">Chọn số lượng các mặt hàng cần xuất và xác nhận thông tin giao nhận</p>
+            </div>
+            <div class="page-actions">
+                <a href="/products" class="btn btn-outline">
+                    <svg viewBox="0 0 24 24"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>
+                    <span>Xem thêm sản phẩm</span>
+                </a>
+                <a href="/customer/orders" class="btn btn-outline">Đơn hàng của tôi</a>
+            </div>
+        </div>
+
+        <!-- Alert Error Message if any -->
+        <div th:if="${error}" class="alert alert-danger">
+            <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg>
+            <span th:text="${error}">Lỗi tạo đơn hàng</span>
+        </div>
+
+        <form th:action="@{/orders/create}" method="post" id="checkoutForm">
+            <div style="display: grid; grid-template-columns: 1.6fr 1fr; gap: 24px; align-items: start;">
+
+                <!-- LEFT: Product Items Selection -->
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-title">
+                            <svg viewBox="0 0 24 24" style="width: 18px; height: 18px; fill: var(--primary);"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V5h14v14z"/></svg>
+                            <span>1. Danh sách sản phẩm lưu kho</span>
+                        </div>
+                        <span style="font-size: 12px; color: var(--text-muted);">Nhập số lượng lớn hơn 0 để chọn</span>
+                    </div>
+
+                    <div style="padding: 16px; display: flex; flex-direction: column; gap: 12px;">
+                        <div th:each="p : ${products}" 
+                             class="checkout-item" 
+                             th:attr="data-price=${p.price}, data-max=${p.inventory != null ? p.inventory.quantity : 0}"
+                             style="background: #ffffff; border: 1px solid var(--border-light); border-radius: var(--radius-md); padding: 14px 16px; display: flex; align-items: center; justify-content: space-between; gap: 16px; transition: var(--transition);">
+                            
+                            <input type="hidden" name="productIds" th:value="${p.id}">
+
+                            <!-- Product Info -->
+                            <div style="display: flex; align-items: center; gap: 12px; flex: 1;">
+                                <div style="width: 48px; height: 48px; border-radius: var(--radius-sm); overflow: hidden; background: #f1f5f9; flex-shrink: 0;">
+                                    <img th:if="${p.imageUrl != null and !p.imageUrl.empty}" th:src="${p.imageUrl}" style="width: 100%; height: 100%; object-fit: cover;">
+                                </div>
+                                <div>
+                                    <div style="font-size: 11px; font-family: monospace; color: var(--text-muted);" th:text="${p.sku}">SKU-01</div>
+                                    <div style="font-size: 14px; font-weight: 600; color: var(--text-primary);" th:text="${p.name}">Tên sản phẩm</div>
+                                    <div style="font-size: 12px; color: var(--emerald-text); margin-top: 2px;">
+                                        Kho còn: <strong th:text="${p.inventory != null ? p.inventory.quantity : 0} + ' ' + ${p.unit}">10 Cái</strong>
+                                        <span style="color: var(--text-subtle); margin-left: 6px;" th:text="'(' + ${p.inventory != null ? p.inventory.location : ''} + ')'">(Kệ A1)</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Price -->
+                            <div style="text-align: right; min-width: 110px;">
+                                <div style="font-size: 14px; font-weight: 600; color: var(--primary);" th:text="${#numbers.formatDecimal(p.price, 0, 'COMMA', 0, 'POINT')} + ' đ'">1.000.000 đ</div>
+                                <div style="font-size: 11px; color: var(--text-muted);" th:text="'/ ' + ${p.unit}">/ Cái</div>
+                            </div>
+
+                            <!-- Qty Input -->
+                            <div style="width: 100px;">
+                                <input type="number" 
+                                       name="quantities" 
+                                       min="0" 
+                                       th:max="${p.inventory != null ? p.inventory.quantity : 0}"
+                                       th:value="${selectedProductId != null and selectedProductId == p.id ? 1 : 0}"
+                                       th:disabled="${p.inventory == null or p.inventory.quantity <= 0}"
+                                       class="qty-input form-control"
+                                       placeholder="0"
+                                       style="text-align: center; font-weight: 600;">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- RIGHT: Customer Delivery & Summary -->
+                <div style="display: flex; flex-direction: column; gap: 20px;">
+                    
+                    <!-- Customer Information Box -->
+                    <div class="card">
+                        <div class="card-header">
+                            <div class="card-title">
+                                <svg viewBox="0 0 24 24" style="width: 18px; height: 18px; fill: var(--primary);"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
+                                <span>2. Thông tin nhận hàng</span>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <div class="form-group">
+                                <label class="form-label">Tài khoản đặt hàng</label>
+                                <input type="text" readonly th:value="${username}" class="form-control" style="background: var(--bg-surface-alt); color: var(--text-muted);">
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label">Số điện thoại liên hệ *</label>
+                                <input type="text" name="phone" th:value="${phone != null ? phone : '0912345678'}" required placeholder="Nhập số điện thoại..." class="form-control">
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label">Địa chỉ giao hàng / Chi nhánh nhận *</label>
+                                <textarea name="shippingAddress" rows="3" required placeholder="Nhập địa chỉ cụ thể..." class="form-control" th:text="${address != null ? address : 'Kho Tổng Hà Nội - Khu Công Nghiệp Đài Tư'}"></textarea>
+                            </div>
+
+                            <div class="form-group" style="margin-bottom: 0;">
+                                <label class="form-label">Ghi chú giao nhận</label>
+                                <input type="text" name="note" placeholder="Ghi chú thêm nếu có..." class="form-control">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Payment Summary Box -->
+                    <div class="card" style="border: 2px solid var(--primary-border); box-shadow: var(--shadow-md);">
+                        <div class="card-body">
+                            <h3 style="font-size: 16px; font-weight: 700; color: var(--text-primary); margin-bottom: 14px;">Tóm tắt thanh toán</h3>
+
+                            <div style="display: flex; justify-content: space-between; font-size: 14px; color: var(--text-muted); margin-bottom: 8px;">
+                                <span>Tổng số lượng đặt:</span>
+                                <strong id="selectedCount" style="color: var(--text-primary);">0 đơn vị</strong>
+                            </div>
+
+                            <div style="display: flex; justify-content: space-between; font-size: 14px; color: var(--text-muted); margin-bottom: 16px;">
+                                <span>Vận chuyển nội bộ:</span>
+                                <span class="badge badge-success">Miễn phí</span>
+                            </div>
+
+                            <div style="height: 1px; background: var(--border-light); margin-bottom: 16px;"></div>
+
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                                <span style="font-size: 15px; font-weight: 600; color: var(--text-primary);">Tổng thanh toán:</span>
+                                <span id="totalAmountText" style="font-size: 22px; font-weight: 700; color: var(--primary);">0 đ</span>
+                            </div>
+
+                            <button type="submit" class="btn btn-primary" style="width: 100%; height: 44px; font-size: 15px;">
+                                Xác Nhận Tạo Đơn Hàng
+                            </button>
+                        </div>
+                    </div>
+
+                </div>
+
+            </div>
+        </form>
+    </main>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const inputs = document.querySelectorAll('.qty-input');
+            const totalText = document.getElementById('totalAmountText');
+            const selectedCount = document.getElementById('selectedCount');
+
+            function recalculate() {
+                let total = 0;
+                let count = 0;
+                inputs.forEach(input => {
+                    const val = parseInt(input.value) || 0;
+                    const item = input.closest('.checkout-item');
+                    const price = parseFloat(item.getAttribute('data-price')) || 0;
+                    if (val > 0) {
+                        count += val;
+                        total += val * price;
+                        item.style.borderColor = 'var(--primary-border)';
+                        item.style.background = 'var(--primary-light)';
+                    } else {
+                        item.style.borderColor = 'var(--border-light)';
+                        item.style.background = '#ffffff';
+                    }
+                });
+
+                selectedCount.innerText = count + ' đơn vị';
+                totalText.innerText = new Intl.NumberFormat('vi-VN').format(total) + ' đ';
+            }
+
+            inputs.forEach(input => {
+                input.addEventListener('input', recalculate);
+                input.addEventListener('change', recalculate);
+            });
+
+            recalculate();
+        });
+    </script>
+</body>
+</html>

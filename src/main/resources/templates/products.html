@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Danh Mục Sản Phẩm Kho - KhoHang Pro</title>
+    <link rel="stylesheet" th:href="@{/css/home.css}">
+</head>
+<body>
+
+    <!-- Unified Navbar -->
+    <header th:replace="~{fragments/navbar :: header('products')}"></header>
+
+    <main class="container">
+        <!-- Page Header -->
+        <div class="page-header">
+            <div>
+                <h1 class="page-title">Hàng Hóa & Thiết Bị Lưu Kho</h1>
+                <p class="page-subtitle">Tra cứu số lượng tồn thực tế và đặt hàng xuất kho nhanh chóng</p>
+            </div>
+            <div class="page-actions">
+                <a href="/orders/checkout" class="btn btn-primary">
+                    <svg viewBox="0 0 24 24"><path d="M7 18c-1.1 0-1.99.9-1.99 2S5.9 22 7 22s2-.9 2-2-.9-2-2-2zM1 2v2h2l3.6 7.59-1.35 2.45c-.16.28-.25.61-.25.96 0 1.1.9 2 2 2h12v-2H7.42c-.14 0-.25-.11-.25-.25l.03-.12.9-1.63h7.45c.75 0 1.41-.41 1.75-1.03l3.58-6.49c.08-.14.12-.31.12-.48 0-.55-.45-1-1-1H5.21l-.94-2H1zm16 16c-1.1 0-1.99.9-1.99 2s.89 2 1.99 2 2-.9 2-2-.9-2-2-2z"/></svg>
+                    <span>Tạo Đơn Hàng</span>
+                </a>
+            </div>
+        </div>
+
+        <!-- Filter Bar -->
+        <div class="search-bar-wrap">
+            <form action="/products" method="get" style="display: flex; gap: 8px; flex: 1; max-width: 440px;">
+                <input type="text" name="keyword" th:value="${keyword}" placeholder="Tìm theo tên sản phẩm hoặc mã SKU..." class="form-control">
+                <button type="submit" class="btn btn-primary">Tìm</button>
+                <a href="/products" th:if="${keyword != null or selectedCategory != null}" class="btn btn-outline">Xóa lọc</a>
+            </form>
+
+            <div style="display: flex; gap: 6px; flex-wrap: wrap; margin-left: auto;">
+                <a href="/products" class="btn btn-sm" th:classappend="${selectedCategory == null} ? 'btn-primary' : 'btn-outline'">Tất cả</a>
+                <a href="/products?category=Thiết bị kho" class="btn btn-sm" th:classappend="${selectedCategory == 'Thiết bị kho'} ? 'btn-primary' : 'btn-outline'">Thiết bị kho</a>
+                <a href="/products?category=Công cụ kho" class="btn btn-sm" th:classappend="${selectedCategory == 'Công cụ kho'} ? 'btn-primary' : 'btn-outline'">Công cụ kho</a>
+                <a href="/products?category=Vật tư lưu kho" class="btn btn-sm" th:classappend="${selectedCategory == 'Vật tư lưu kho'} ? 'btn-primary' : 'btn-outline'">Vật tư</a>
+                <a href="/products?category=Bao bì đóng gói" class="btn btn-sm" th:classappend="${selectedCategory == 'Bao bì đóng gói'} ? 'btn-primary' : 'btn-outline'">Bao bì</a>
+            </div>
+        </div>
+
+        <!-- Empty State -->
+        <div th:if="${products.empty}" class="card" style="text-align: center; padding: 60px 20px;">
+            <svg viewBox="0 0 24 24" style="width: 48px; height: 48px; fill: var(--text-subtle); margin-bottom: 12px;"><path d="M20 6h-8l-2-2H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2zm0 12H4V8h16v10z"/></svg>
+            <h3 style="font-size: 17px; color: var(--text-primary); margin-bottom: 6px;">Không tìm thấy sản phẩm phù hợp</h3>
+            <p style="color: var(--text-muted); font-size: 14px; margin-bottom: 16px;">Vui lòng thử lại với từ khóa khác hoặc xóa bộ lọc.</p>
+            <a href="/products" class="btn btn-outline" style="display: inline-flex;">Xem tất cả sản phẩm</a>
+        </div>
+
+        <!-- Product Cards Grid -->
+        <div class="product-grid" th:unless="${products.empty}">
+            <div th:each="p : ${products}" class="product-card">
+                <div class="product-img-box">
+                    <img th:if="${p.imageUrl != null and !p.imageUrl.empty}" th:src="${p.imageUrl}" th:alt="${p.name}">
+                    <div th:unless="${p.imageUrl != null and !p.imageUrl.empty}" style="width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; background: #e2e8f0; color: #94a3b8;">
+                        <svg viewBox="0 0 24 24" style="width: 40px; height: 40px; fill: currentColor;"><path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z"/></svg>
+                    </div>
+
+                    <!-- Category badge on top left -->
+                    <span style="position: absolute; top: 10px; left: 10px; background: rgba(255,255,255,0.92); color: var(--text-secondary); font-size: 11px; font-weight: 600; padding: 3px 8px; border-radius: 6px; box-shadow: var(--shadow-sm);" th:text="${p.category}">Danh mục</span>
+
+                    <!-- Stock badge on top right -->
+                    <span th:if="${p.inventory != null and p.inventory.quantity > p.inventory.minThreshold}" class="badge badge-success" style="position: absolute; top: 10px; right: 10px;">
+                        Còn hàng
+                    </span>
+                    <span th:if="${p.inventory != null and p.inventory.quantity <= p.inventory.minThreshold and p.inventory.quantity > 0}" class="badge badge-warning" style="position: absolute; top: 10px; right: 10px;">
+                        Sắp hết
+                    </span>
+                    <span th:if="${p.inventory != null and p.inventory.quantity <= 0}" class="badge badge-danger" style="position: absolute; top: 10px; right: 10px;">
+                        Hết hàng
+                    </span>
+                </div>
+
+                <div class="product-body">
+                    <div class="product-sku" th:text="${p.sku}">SKU-001</div>
+                    <h3 class="product-name" th:text="${p.name}">Tên sản phẩm</h3>
+                    <p class="product-desc" th:text="${p.description}">Mô tả chi tiết sản phẩm.</p>
+
+                    <div style="background: var(--bg-surface-alt); border-radius: var(--radius-sm); padding: 8px 12px; margin-bottom: 14px; font-size: 12px; display: flex; justify-content: space-between;">
+                        <span>Kệ: <strong th:text="${p.inventory != null ? p.inventory.location : 'Chưa xếp'}">Kệ A1</strong></span>
+                        <span>Tồn: <strong th:text="${p.inventory != null ? p.inventory.quantity : 0} + ' ' + ${p.unit}">10 Cái</strong></span>
+                    </div>
+
+                    <div class="product-footer">
+                        <div>
+                            <div style="font-size: 11px; color: var(--text-subtle);">Đơn giá:</div>
+                            <div class="product-price" th:text="${#numbers.formatDecimal(p.price, 0, 'COMMA', 0, 'POINT')} + ' đ'">1.000.000 đ</div>
+                        </div>
+
+                        <a th:if="${p.inventory != null and p.inventory.quantity > 0}" 
+                           th:href="@{'/orders/checkout?productId=' + ${p.id}}" 
+                           class="btn btn-primary btn-sm">
+                            Đặt mua
+                        </a>
+                        <button th:unless="${p.inventory != null and p.inventory.quantity > 0}" disabled class="btn btn-outline btn-sm" style="opacity: 0.5;">
+                            Hết hàng
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+</body>
+</html>

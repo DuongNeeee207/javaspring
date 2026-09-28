@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quản Lý Kho Hàng & Tồn Kho - KhoHang Pro</title>
+    <link rel="stylesheet" th:href="@{/css/home.css}">
+</head>
+<body>
+
+    <!-- Unified Navbar -->
+    <header th:replace="~{fragments/navbar :: header('inventory')}"></header>
+
+    <main class="container">
+        <!-- Page Header -->
+        <div class="page-header">
+            <div>
+                <h1 class="page-title">Quản Lý Tồn Kho & Cảnh Báo</h1>
+                <p class="page-subtitle">Theo dõi định mức tồn kho tối thiểu, nhập hàng bổ sung và điều chỉnh vị trí kệ hàng</p>
+            </div>
+            <div class="page-actions">
+                <a href="/admin/products" class="btn btn-outline">
+                    <svg viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V5h14v14z"/></svg>
+                    <span>Quản lý sản phẩm</span>
+                </a>
+            </div>
+        </div>
+
+        <!-- Alerts -->
+        <div th:if="${success}" class="alert alert-success">
+            <svg viewBox="0 0 24 24"><path d="M9 16.2L4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4L9 16.2z"/></svg>
+            <span th:text="${success}">Thành công</span>
+        </div>
+        <div th:if="${error}" class="alert alert-danger">
+            <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg>
+            <span th:text="${error}">Lỗi</span>
+        </div>
+
+        <!-- Low Stock Warning Banner -->
+        <div th:if="${!lowStockList.empty}" class="alert alert-warning" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;">
+            <div style="display: flex; align-items: center; gap: 12px;">
+                <svg viewBox="0 0 24 24" style="fill: var(--amber);"><path d="M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z"/></svg>
+                <div>
+                    <strong style="color: var(--amber-text);">Cảnh báo: Có <span th:text="${lowStockList.size()}">2</span> mặt hàng dưới ngưỡng an toàn!</strong>
+                    <div style="font-size: 13px; color: var(--amber-text); margin-top: 2px;">Cần nhập bổ sung vào kho để tránh tình trạng thiếu hàng khi khách đặt.</div>
+                </div>
+            </div>
+            <div style="display: flex; gap: 6px; flex-wrap: wrap;">
+                <span th:each="ls : ${lowStockList}" class="badge badge-warning" th:text="${ls.product.name} + ' (còn ' + ${ls.quantity} + ')'">SP</span>
+            </div>
+        </div>
+
+        <!-- Inventory Table Card -->
+        <div class="card">
+            <div class="card-header">
+                <div class="card-title">
+                    <svg viewBox="0 0 24 24" style="width: 18px; height: 18px; fill: var(--primary);"><path d="M4 6H2v14c0 1.1.9 2 2 2h14v-2H4V6zm16-4H8c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 14H8V4h12v12z"/></svg>
+                    <span>Danh Sách Tồn Kho Chi Tiết</span>
+                </div>
+                <span style="font-size: 13px; color: var(--text-muted);" th:text="'Tổng cộng: ' + ${inventoryList.size()} + ' bản ghi'">6 bản ghi</span>
+            </div>
+
+            <div class="table-responsive">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Sản Phẩm & Mã SKU</th>
+                            <th>Vị Trí Phân Khu Kệ</th>
+                            <th style="text-align: center;">Tồn Kho Hiện Có</th>
+                            <th style="text-align: center;">Định Mức Tối Thiểu</th>
+                            <th style="text-align: center;">Trạng Thái</th>
+                            <th style="text-align: right;">Hành Động</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="inv : ${inventoryList}">
+                            <td>
+                                <div style="font-weight: 600; color: var(--text-primary);" th:text="${inv.product.name}">Tên SP</div>
+                                <div style="font-size: 11px; font-family: monospace; color: var(--primary);" th:text="${inv.product.sku}">SKU-01</div>
+                            </td>
+                            <td>
+                                <span class="badge badge-neutral" th:text="${inv.location}">Kệ A1</span>
+                            </td>
+                            <td style="text-align: center; font-size: 15px; font-weight: 700;" 
+                                th:styleappend="${inv.quantity <= inv.minThreshold} ? 'color: var(--amber-text);' : 'color: var(--emerald-text);'"
+                                th:text="${inv.quantity} + ' ' + ${inv.product.unit}">
+                                50 Cái
+                            </td>
+                            <td style="text-align: center; color: var(--text-muted);" th:text="${inv.minThreshold} + ' ' + ${inv.product.unit}">
+                                10 Cái
+                            </td>
+                            <td style="text-align: center;">
+                                <span th:if="${inv.quantity > inv.minThreshold}" class="badge badge-success">An toàn</span>
+                                <span th:if="${inv.quantity <= inv.minThreshold and inv.quantity > 0}" class="badge badge-warning">Thiếu hụt</span>
+                                <span th:if="${inv.quantity <= 0}" class="badge badge-danger">Cháy kho</span>
+                            </td>
+                            <td style="text-align: right;">
+                                <div style="display: inline-flex; gap: 6px;">
+                                    <button type="button" 
+                                            th:attr="data-id=${inv.id}, data-name=${inv.product.name}, data-unit=${inv.product.unit}"
+                                            onclick="openAddStockModal(this)"
+                                            class="btn btn-primary btn-sm">
+                                        + Nhập Kho
+                                    </button>
+                                    <button type="button" 
+                                            th:attr="data-id=${inv.id}, data-name=${inv.product.name}, data-qty=${inv.quantity}, data-min=${inv.minThreshold}, data-loc=${inv.location}"
+                                            onclick="openEditInvModal(this)"
+                                            class="btn btn-outline btn-sm">
+                                        Sửa Kệ
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </main>
+
+    <!-- Modal Quick Add Stock -->
+    <div id="addStockModal" class="modal-overlay" style="display: none;">
+        <div class="modal-dialog">
+            <div class="modal-header">
+                <h3 class="modal-title">+ Nhập Hàng Bổ Sung</h3>
+                <button type="button" onclick="document.getElementById('addStockModal').style.display='none'" class="modal-close">&times;</button>
+            </div>
+            <form id="addStockForm" method="post">
+                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label class="form-label">Sản phẩm tiếp nhận</label>
+                        <div id="addStockProdName" style="font-weight: 600; color: var(--text-primary); font-size: 15px; padding: 6px 0;">Tên sản phẩm</div>
+                    </div>
+                    <div class="form-group" style="margin-bottom: 0;">
+                        <label class="form-label">Số lượng nhập thêm vào kho *</label>
+                        <input type="number" name="addQty" required min="1" value="10" class="form-control" style="font-size: 16px; font-weight: 600;">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" onclick="document.getElementById('addStockModal').style.display='none'" class="btn btn-outline">Hủy</button>
+                    <button type="submit" class="btn btn-primary">Xác Nhận Nhập Kho</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal Edit Inventory -->
+    <div id="editInvModal" class="modal-overlay" style="display: none;">
+        <div class="modal-dialog">
+            <div class="modal-header">
+                <h3 class="modal-title">Cấu Hình Định Mức & Kệ Kho</h3>
+                <button type="button" onclick="document.getElementById('editInvModal').style.display='none'" class="modal-close">&times;</button>
+            </div>
+            <form id="editInvForm" method="post">
+                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label class="form-label">Sản phẩm</label>
+                        <div id="editInvProdName" style="font-weight: 600; color: var(--text-primary); font-size: 15px; padding: 6px 0;">Tên sản phẩm</div>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Số lượng kiểm kê thực tế</label>
+                        <input type="number" id="editInvQty" name="quantity" min="0" class="form-control">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Ngưỡng cảnh báo thiếu hàng (Min Threshold)</label>
+                        <input type="number" id="editInvMin" name="minThreshold" min="1" class="form-control">
+                    </div>
+                    <div class="form-group" style="margin-bottom: 0;">
+                        <label class="form-label">Vị trí kệ hàng</label>
+                        <input type="text" id="editInvLoc" name="location" placeholder="Ví dụ: Kệ A-01..." class="form-control">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" onclick="document.getElementById('editInvModal').style.display='none'" class="btn btn-outline">Hủy</button>
+                    <button type="submit" class="btn btn-primary">Lưu Cấu Hình</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        function openAddStockModal(btn) {
+            const id = btn.getAttribute('data-id');
+            const name = btn.getAttribute('data-name');
+            const unit = btn.getAttribute('data-unit');
+            document.getElementById('addStockForm').action = '/admin/inventory/addstock/' + id;
+            document.getElementById('addStockProdName').innerText = name + ' (' + unit + ')';
+            document.getElementById('addStockModal').style.display = 'flex';
+        }
+
+        function openEditInvModal(btn) {
+            const id = btn.getAttribute('data-id');
+            const name = btn.getAttribute('data-name');
+            const qty = btn.getAttribute('data-qty');
+            const min = btn.getAttribute('data-min');
+            const loc = btn.getAttribute('data-loc');
+            document.getElementById('editInvForm').action = '/admin/inventory/update/' + id;
+            document.getElementById('editInvProdName').innerText = name;
+            document.getElementById('editInvQty').value = qty;
+            document.getElementById('editInvMin').value = min;
+            document.getElementById('editInvLoc').value = loc || '';
+            document.getElementById('editInvModal').style.display = 'flex';
+        }
+    </script>
+</body>
+</html>

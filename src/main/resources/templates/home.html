@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tổng Quan Kho - KhoHang Pro</title>
+    <link rel="stylesheet" th:href="@{/css/home.css}">
+</head>
+<body>
+
+    <!-- Unified Navbar -->
+    <header th:replace="~{fragments/navbar :: header('home')}"></header>
+
+    <main class="container">
+        <!-- Page Header -->
+        <div class="page-header">
+            <div>
+                <h1 class="page-title">Bảng Điều Khiển Quản Trị Kho</h1>
+                <p class="page-subtitle">Theo dõi tổng thể trạng thái tồn kho, đơn đặt hàng và biến động kho</p>
+            </div>
+            <div class="page-actions">
+                <a href="/admin/inventory" class="btn btn-primary">
+                    <svg viewBox="0 0 24 24"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>
+                    <span>Quản lý kho</span>
+                </a>
+                <a href="/admin/products" class="btn btn-outline">
+                    <svg viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V5h14v14z"/></svg>
+                    <span>Xem sản phẩm</span>
+                </a>
+            </div>
+        </div>
+
+        <!-- Team Capstone Info Banner -->
+        <div class="alert alert-warning" style="margin-bottom: 24px; border-left: 4px solid var(--amber);">
+            <svg viewBox="0 0 24 24" style="fill: var(--amber);"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg>
+            <div style="flex: 1;">
+                <strong>Mini Capstone Project 3: Ứng Dụng Quản Lý Kho Hàng & Đơn Đặt (Java Spring 2)</strong>
+                <div style="font-size: 13px; color: var(--amber-text); margin-top: 2px;">
+                    Nhóm thực hiện: <strong>Nguyễn Đức Dương</strong> (21250064 - Nhóm trưởng) & <strong>Phạm Hoàng Hưng Thịnh</strong> (21240318 - Thành viên)
+                </div>
+            </div>
+        </div>
+
+        <!-- 4 KPI Stats Grid -->
+        <div class="stat-grid">
+            <div class="stat-card">
+                <div class="stat-icon indigo">
+                    <svg viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V5h14v14z"/></svg>
+                </div>
+                <div>
+                    <div class="stat-label">Tổng mặt hàng</div>
+                    <div class="stat-value" th:text="${totalProducts}">6</div>
+                    <div class="stat-desc">Đang lưu kho</div>
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-icon emerald">
+                    <svg viewBox="0 0 24 24"><path d="M11.8 10.9c-2.27-.59-3-1.2-3-2.15 0-1.09 1.01-1.85 2.7-1.85 1.78 0 2.44.85 2.5 2.1h2.21c-.07-1.72-1.12-3.3-3.21-3.81V3h-3v2.16c-1.94.42-3.5 1.68-3.5 3.61 0 2.31 1.91 3.46 4.7 4.13 2.5.6 3 1.48 3 2.41 0 .69-.49 1.79-2.7 1.79-2.06 0-2.87-.92-2.98-2.1h-2.2c.12 2.19 1.76 3.42 3.68 3.83V21h3v-2.15c1.95-.37 3.5-1.5 3.5-3.55 0-2.84-2.43-3.81-4.7-4.4z"/></svg>
+                </div>
+                <div>
+                    <div class="stat-label">Giá trị ước tính kho</div>
+                    <div class="stat-value" style="font-size: 20px; color: var(--emerald-text);" th:text="${totalStockValue}">150.000.000 đ</div>
+                    <div class="stat-desc">Tính theo giá niêm yết</div>
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-icon amber">
+                    <svg viewBox="0 0 24 24"><path d="M19 3h-4.18C14.4 1.84 13.3 1 12 1c-1.3 0-2.4.84-2.82 2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 0c.55 0 1 .45 1 1s-.45 1-1 1-1-.45-1-1 .45-1 1-1zm2 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"/></svg>
+                </div>
+                <div>
+                    <div class="stat-label">Đơn chờ duyệt xuất</div>
+                    <div class="stat-value" style="color: var(--amber-text);" th:text="${pendingOrders}">0</div>
+                    <div class="stat-desc">Cần xác nhận xuất kho</div>
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-icon sky">
+                    <svg viewBox="0 0 24 24"><path d="M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z"/></svg>
+                </div>
+                <div>
+                    <div class="stat-label">Cảnh báo tồn thấp</div>
+                    <div class="stat-value" style="color: var(--rose-text);" th:text="${lowStockCount}">2</div>
+                    <div class="stat-desc">Dưới ngưỡng an toàn</div>
+                </div>
+            </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px;">
+            <!-- Low Stock Warnings Table -->
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title">
+                        <svg viewBox="0 0 24 24" style="width: 18px; height: 18px; fill: var(--amber);"><path d="M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z"/></svg>
+                        <span>Hàng Hóa Sắp Hết (Cần Nhập Kho)</span>
+                    </div>
+                    <a href="/admin/inventory" class="btn btn-outline btn-sm">Xem tất cả kho</a>
+                </div>
+                <div class="table-responsive">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Sản phẩm</th>
+                                <th>Vị trí kệ</th>
+                                <th style="text-align: center;">Tồn / Định mức</th>
+                                <th style="text-align: right;">Thao tác</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:if="${lowStockItems.empty}">
+                                <td colspan="4" style="text-align: center; color: var(--text-muted); padding: 30px;">
+                                    Tất cả mặt hàng đều đạt ngưỡng tồn kho an toàn!
+                                </td>
+                            </tr>
+                            <tr th:each="item : ${lowStockItems}">
+                                <td>
+                                    <div style="font-weight: 600; color: var(--text-primary);" th:text="${item.product.name}">Tên SP</div>
+                                    <div style="font-size: 11px; font-family: monospace; color: var(--text-muted);" th:text="${item.product.sku}">SKU</div>
+                                </td>
+                                <td>
+                                    <span class="badge badge-neutral" th:text="${item.location}">Kệ A1</span>
+                                </td>
+                                <td style="text-align: center;">
+                                    <span class="badge badge-warning" th:text="${item.quantity} + ' / ' + ${item.minThreshold} + ' ' + ${item.product.unit}">8 / 15</span>
+                                </td>
+                                <td style="text-align: right;">
+                                    <a href="/admin/inventory" class="btn btn-primary btn-sm">+ Nhập hàng</a>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Recent Orders Table -->
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title">
+                        <svg viewBox="0 0 24 24" style="width: 18px; height: 18px; fill: var(--primary);"><path d="M19 3h-4.18C14.4 1.84 13.3 1 12 1c-1.3 0-2.4.84-2.82 2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 0c.55 0 1 .45 1 1s-.45 1-1 1-1-.45-1-1 .45-1 1-1zm2 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"/></svg>
+                        <span>Đơn Đặt Hàng Gần Đây</span>
+                    </div>
+                    <a href="/admin/orders" class="btn btn-outline btn-sm">Xem tất cả đơn</a>
+                </div>
+                <div class="table-responsive">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Mã đơn</th>
+                                <th>Khách hàng</th>
+                                <th>Tổng tiền</th>
+                                <th>Trạng thái</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:if="${recentOrders.empty}">
+                                <td colspan="4" style="text-align: center; color: var(--text-muted); padding: 30px;">
+                                    Chưa có đơn hàng nào được tạo.
+                                </td>
+                            </tr>
+                            <tr th:each="ord, stat : ${recentOrders}" th:if="${stat.index < 5}">
+                                <td>
+                                    <div style="font-weight: 600; font-family: monospace; color: var(--primary);" th:text="${ord.orderCode}">DH-01</div>
+                                    <div style="font-size: 11px; color: var(--text-subtle);" th:text="${#temporals.format(ord.orderDate, 'dd/MM/yyyy HH:mm')}">Thời gian</div>
+                                </td>
+                                <td th:text="${ord.customer.fullName != null ? ord.customer.fullName : ord.customer.username}">Khách</td>
+                                <td style="font-weight: 600;" th:text="${#numbers.formatDecimal(ord.totalAmount, 0, 'COMMA', 0, 'POINT')} + ' đ'">1.000.000 đ</td>
+                                <td>
+                                    <span th:if="${ord.status == 'PENDING'}" class="badge badge-warning">Chờ duyệt</span>
+                                    <span th:if="${ord.status == 'APPROVED'}" class="badge badge-info">Đã duyệt</span>
+                                    <span th:if="${ord.status == 'SHIPPED'}" class="badge badge-success">Đã giao</span>
+                                    <span th:if="${ord.status == 'CANCELLED'}" class="badge badge-danger">Đã hủy</span>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </main>
+
+</body>
+</html>

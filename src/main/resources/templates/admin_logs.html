@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nhật Ký Hoạt Động AOP - Admin KhoHang Pro</title>
+    <link rel="stylesheet" th:href="@{/css/home.css}">
+</head>
+<body>
+
+    <!-- Unified Navbar -->
+    <header th:replace="~{fragments/navbar :: header('logs')}"></header>
+
+    <main class="container">
+        <!-- Page Header -->
+        <div class="page-header">
+            <div>
+                <h1 class="page-title">Nhật Ký Kiểm Toán Hoạt Động (AOP Logging)</h1>
+                <p class="page-subtitle">Minh chứng kỹ thuật Spring AOP tự động bắt và ghi nhận: Đăng nhập, Thêm sản phẩm, Đặt hàng & Xuất kho</p>
+            </div>
+            <div class="page-actions">
+                <a href="/home" class="btn btn-outline">Về Dashboard</a>
+            </div>
+        </div>
+
+        <!-- Info Banner for AOP -->
+        <div class="alert alert-warning" style="border-left: 4px solid var(--primary);">
+            <svg viewBox="0 0 24 24" style="fill: var(--primary);"><path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z"/></svg>
+            <div style="font-size: 13px;">
+                Tất cả các dòng nhật ký bên dưới được tự động kích hoạt bởi <strong>Aspect-Oriented Programming (AOP)</strong> thông qua lớp <code>LoggingAspect.java</code> (@AfterReturning), không can thiệp trực tiếp vào mã nguồn nghiệp vụ chính.
+            </div>
+        </div>
+
+        <!-- Logs Table Card -->
+        <div class="card">
+            <div class="card-header">
+                <div class="card-title">
+                    <svg viewBox="0 0 24 24" style="width: 18px; height: 18px; fill: var(--primary);"><path d="M19 3h-4.18C14.4 1.84 13.3 1 12 1c-1.3 0-2.4.84-2.82 2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 0c.55 0 1 .45 1 1s-.45 1-1 1-1-.45-1-1 .45-1 1-1zm2 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"/></svg>
+                    <span>Lịch Sử Sự Kiện Thời Gian Thực</span>
+                </div>
+                <span style="font-size: 13px; color: var(--text-muted);" th:text="'Tổng số: ' + ${logs.size()} + ' sự kiện'">0 sự kiện</span>
+            </div>
+
+            <div class="table-responsive">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th style="width: 170px;">Thời Gian</th>
+                            <th style="width: 150px;">Hành Động</th>
+                            <th>Nội Dung Chi Tiết Sự Kiện</th>
+                            <th style="width: 140px; text-align: right;">Người Thực Hiện</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:if="${logs.empty}">
+                            <td colspan="4" style="text-align: center; color: var(--text-muted); padding: 40px;">
+                                Chưa có sự kiện nào được ghi nhận. Hãy thử thao tác Đăng nhập, Thêm sản phẩm hoặc Đặt hàng để kiểm tra AOP!
+                            </td>
+                        </tr>
+                        <tr th:each="log : ${logs}">
+                            <td style="font-family: monospace; font-size: 12px; color: var(--text-muted);" th:text="${log.timestamp}">01/01/2026 12:00:00</td>
+                            <td>
+                                <span th:if="${log.action == 'ĐĂNG NHẬP'}" class="badge badge-info">🔑 Đăng nhập</span>
+                                <span th:if="${log.action == 'THÊM SẢN PHẨM'}" class="badge badge-success">📦 Thêm SP</span>
+                                <span th:if="${log.action == 'CẬP NHẬT SP'}" class="badge badge-neutral">✏️ Cập nhật SP</span>
+                                <span th:if="${log.action == 'XÓA SẢN PHẨM'}" class="badge badge-danger">🗑️ Xóa SP</span>
+                                <span th:if="${log.action == 'ĐẶT HÀNG'}" class="badge badge-warning">🛒 Đặt hàng</span>
+                                <span th:if="${log.action == 'DUYỆT ĐƠN'}" class="badge badge-info">⚙️ Duyệt đơn</span>
+                                <span th:if="${log.action == 'GIAO HÀNG'}" class="badge badge-success">🚚 Giao hàng</span>
+                                <span th:if="${log.action == 'HỦY ĐƠN'}" class="badge badge-danger">❌ Hủy đơn</span>
+                                <span th:if="${log.action == 'NHẬP KHO'}" class="badge badge-success">📥 Nhập kho</span>
+                            </td>
+                            <td style="color: var(--text-primary); font-size: 13px;" th:text="${log.detail}">Chi tiết</td>
+                            <td style="text-align: right;">
+                                <span class="badge badge-neutral" style="font-weight: 600;" th:text="${log.username}">user</span>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </main>
+
+</body>
+</html>
